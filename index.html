@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guilherme Mendes — Engenheiro de Software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f5f2eb;
+    --paper-dark: #ede9e0;
+    --accent: #c8401a;
+    --muted: #7a7570;
+    --line: rgba(26,26,26,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+    cursor: none;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+  .cursor {
+    position: fixed; top: 0; left: 0; z-index: 9999;
+    pointer-events: none; transform: translate(-50%,-50%);
+  }
+  .cursor svg { width: 28px; height: 28px; }
+
+  /* LOADER */
+  #loader {
+    position: fixed; inset: 0; z-index: 1000;
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px;
+    transition: opacity 0.6s ease, visibility 0.6s;
+  }
+  #loader.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+  .loader-text { font-family: 'Caveat', cursive; font-size: 1.1rem; color: var(--muted); letter-spacing: 0.05em; }
+
+  section { position: relative; z-index: 1; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nav-logo {
+    font-family: 'DM Serif Display', serif; font-size: 1.2rem;
+    text-decoration: none; color: var(--ink); position: relative;
+  }
+  .nav-logo::after {
+    content: '✦'; font-size: 0.5rem;
+    position: absolute; top: 2px; right: -14px; color: var(--accent);
+    animation: spin 4s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.72rem; text-decoration: none; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    position: relative; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a .hover-sketch {
+    position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .nav-links a:hover .hover-sketch { opacity: 1; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh; display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center; padding: 8rem 3rem 4rem; gap: 2rem;
+  }
+  .hero-tag {
+    font-family: 'Caveat', cursive; font-size: 1rem; color: var(--accent);
+    margin-bottom: 1.2rem; display: flex; align-items: center; gap: 8px;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 1.05; letter-spacing: -0.02em;
+  }
+  h1 em { font-style: italic; color: var(--accent); position: relative; }
+  h1 em::after {
+    content: ''; position: absolute; bottom: 4px; left: 0; right: 0; height: 3px;
+    background: var(--accent); border-radius: 2px;
+    transform: scaleX(0); transform-origin: left;
+    animation: underline-in 0.8s 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes underline-in { to { transform: scaleX(1); } }
+  .hero-sub { margin-top: 1.8rem; font-size: 0.85rem; line-height: 1.8; color: var(--muted); max-width: 400px; }
+  .hero-cta { margin-top: 2.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+  .btn {
+    position: relative; display: inline-block; padding: 0.75rem 1.8rem;
+    font-family: 'DM Mono', monospace; font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
+    cursor: none; border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-sketch {
+    position: absolute; top: 0; right: -10px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    transform: translate(0,-10px) rotate(-8deg);
+  }
+  .btn:hover .btn-sketch { opacity: 1; transform: translate(6px,-22px) rotate(-8deg); }
+  .btn-link {
+    font-family: 'Caveat', cursive; font-size: 1rem; color: var(--muted);
+    text-decoration: none; border-bottom: 1px dashed var(--muted);
+    padding-bottom: 2px; transition: color 0.2s;
+  }
+  .btn-link:hover { color: var(--ink); }
+  .hero-right { display: flex; align-items: center; justify-content: center; }
+  .hero-doodle-field { position: relative; width: 100%; max-width: 480px; height: 480px; }
+  .hero-doodle-field .d { position: absolute; }
+  .hero-stats {
+    position: absolute; bottom: 3rem; left: 3rem; display: flex; gap: 3rem;
+  }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 2.5rem; line-height: 1; }
+  .stat-label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .stat-item { position: relative; }
+  .stat-sketch { position: absolute; top: -8px; right: -16px; }
+
+  /* DIVIDERS */
+  .sketch-divider {
+    position: relative; height: 80px; overflow: visible;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .divider-line { position: absolute; top: 50%; left: 5%; right: 5%; border: none; border-top: 1.5px solid var(--line); }
+  .walking-cat {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    animation: cat-walk 8s linear infinite;
+  }
+  @keyframes cat-walk { from { left: -60px; } to { left: calc(100% + 60px); } }
+
+  /* ABOUT */
+  #about { padding: 6rem 3rem; display: grid; grid-template-columns: 1fr 1.2fr; gap: 6rem; align-items: start; }
+  .section-label { font-family: 'Caveat', cursive; font-size: 0.95rem; color: var(--accent); letter-spacing: 0.05em; margin-bottom: 0.6rem; }
+  h2 { font-family: 'DM Serif Display', serif; font-size: clamp(2rem,3.5vw,2.8rem); line-height: 1.15; margin-bottom: 1.5rem; }
+  .about-body { font-size: 0.82rem; line-height: 2; color: var(--muted); }
+  .about-body p + p { margin-top: 1rem; }
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 2rem; }
+  .skill-chip {
+    padding: 0.6rem 0.9rem; border: 1.5px solid var(--line);
+    font-size: 0.72rem; letter-spacing: 0.07em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px; transition: border-color 0.2s;
+  }
+  .skill-chip:hover { border-color: var(--ink); }
+  .chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .about-right { position: relative; }
+  .about-sketch-float { position: absolute; right: -20px; top: -40px; animation: float 3s ease-in-out infinite; }
+
+  /* WORK */
+  #work { padding: 6rem 3rem; background: var(--paper-dark); position: relative; }
+  #work::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 31px, var(--line) 31px, var(--line) 32px);
+  }
+  .work-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; position: relative; z-index: 1; }
+  .project-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; position: relative; z-index: 1; }
+  .project-card {
+    background: var(--paper); padding: 2rem; position: relative;
+    border: 1.5px solid transparent; transition: transform 0.25s; cursor: none; overflow: visible;
+  }
+  .project-card::before {
+    content: ''; position: absolute; inset: -1px;
+    border: 1.5px solid var(--ink); opacity: 0; transition: opacity 0.25s;
+  }
+  .project-card:hover { transform: translate(-2px,-4px); }
+  .project-card:hover::before { opacity: 1; }
+  .project-card:hover .card-hover-sketch { opacity: 1; transform: translate(8px,-8px); }
+  .card-hover-sketch {
+    position: absolute; top: 0; right: 0;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    transform: translate(4px,-4px); pointer-events: none;
+  }
+  .card-num { font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--line); line-height: 1; margin-bottom: 0.5rem; }
+  .card-title { font-family: 'DM Serif Display', serif; font-size: 1.25rem; margin-bottom: 0.5rem; }
+  .card-desc { font-size: 0.75rem; line-height: 1.7; color: var(--muted); }
+  .card-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.2rem; }
+  .tag { font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; background: var(--paper-dark); color: var(--muted); }
+
+  /* CONTACT */
+  #contact { padding: 8rem 3rem; text-align: center; position: relative; }
+  .contact-inner { max-width: 600px; margin: 0 auto; position: relative; }
+  .contact-sketch-left { position: absolute; left: -80px; top: 40px; animation: wiggle 2s ease-in-out infinite; }
+  .contact-sketch-right { position: absolute; right: -80px; top: 60px; animation: wiggle 2s ease-in-out infinite reverse; }
+  .contact-email {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1rem, 2.5vw, 2rem);
+    text-decoration: none; color: var(--ink);
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 4px; display: inline-block;
+    transition: color 0.2s; word-break: break-all;
+  }
+  .contact-email:hover { color: var(--accent); }
+  .contact-social { display: flex; gap: 2rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+  .social-link {
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    text-decoration: none; color: var(--muted); position: relative; transition: color 0.2s;
+  }
+  .social-link:hover { color: var(--ink); }
+  .social-link .hover-arrow { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; }
+  .social-link:hover .hover-arrow { opacity: 1; }
+
+  /* FOOTER */
+  footer { padding: 3rem; border-top: 1.5px solid var(--line); display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 2rem; }
+  .footer-left { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; line-height: 1.8; }
+  .footer-center { display: flex; justify-content: center; }
+  .footer-right { font-size: 0.7rem; color: var(--muted); text-align: right; letter-spacing: 0.08em; line-height: 1.8; }
+
+  /* SCROLL */
+  .scroll-indicator { position: fixed; right: 2rem; bottom: 2rem; z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: opacity 0.3s; }
+  .si-label { font-family: 'Caveat', cursive; font-size: 0.8rem; color: var(--muted); writing-mode: vertical-lr; }
+  .scroll-line { width: 1px; height: 60px; background: var(--muted); animation: scroll-pulse 1.5s ease-in-out infinite; }
+
+  /* ANIMATIONS */
+  @keyframes blink { 0%,90%,100% { transform: scaleY(1); } 95% { transform: scaleY(0.05); } }
+  @keyframes tail-wag { 0%,100% { transform: rotate(0deg); } 30% { transform: rotate(20deg); } 60% { transform: rotate(-15deg); } }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+  @keyframes wiggle { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  @keyframes walk-leg1 { from { transform: rotate(-20deg); } to { transform: rotate(20deg); } }
+  @keyframes walk-leg2 { from { transform: rotate(20deg); } to { transform: rotate(-20deg); } }
+  @keyframes scroll-pulse { 0%,100% { opacity: 0.3; transform: scaleY(1); } 50% { opacity: 1; transform: scaleY(0.6); } }
+  @keyframes jitter { 0%,100% { transform: translate(0,0) rotate(0deg); } 25% { transform: translate(0.4px,-0.3px) rotate(0.3deg); } 50% { transform: translate(-0.3px,0.4px) rotate(-0.2deg); } 75% { transform: translate(0.3px,0.3px) rotate(0.1deg); } }
+
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    #hero { grid-template-columns: 1fr; padding: 6rem 1.5rem 3rem; }
+    .hero-right { display: none; }
+    #about { grid-template-columns: 1fr; gap: 2rem; padding: 4rem 1.5rem; }
+    .project-grid { grid-template-columns: 1fr; }
+    #work, #contact { padding: 4rem 1.5rem; }
+    footer { grid-template-columns: 1fr; text-align: center; }
+    .footer-right { text-align: center; }
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { gap: 1.2rem; }
+    .hero-stats { left: 1.5rem; bottom: 2rem; gap: 1.5rem; }
+    .contact-sketch-left, .contact-sketch-right { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor">
+  <svg viewBox="0 0 28 28" fill="none">
+    <path d="M4 4 L14 22 L17 14 L25 11 Z" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="0.5" stroke-linejoin="round"/>
+    <path d="M17 14 L22 22" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+    <ellipse cx="40" cy="52" rx="20" ry="18" stroke="#1a1a1a" stroke-width="1.8" fill="none"/>
+    <path d="M24 38 L20 26 L30 33" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+    <path d="M56 38 L60 26 L50 33" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+    <ellipse cx="33" cy="48" rx="3" ry="3.5" fill="#1a1a1a" style="animation:blink 3s ease-in-out infinite"/>
+    <ellipse cx="47" cy="48" rx="3" ry="3.5" fill="#1a1a1a" style="animation:blink 3s ease-in-out infinite 0.05s"/>
+    <path d="M39 54 L40 53 L41 54 L40 55 Z" fill="#1a1a1a"/>
+    <path d="M25 54 L35 54 M25 57 L35 56 M45 54 L55 54 M45 56 L55 57" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M60 62 Q72 58 70 70 Q68 75 62 72" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linecap="round" style="animation:tail-wag 1s ease-in-out infinite; transform-origin:60px 62px"/>
+  </svg>
+  <span class="loader-text">carregando...</span>
+</div>
+
+<!-- SCROLL INDICATOR -->
+<div class="scroll-indicator" id="scrollIndicator">
+  <div class="scroll-line"></div>
+  <span class="si-label">scroll</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">gm.</a>
+  <ul class="nav-links">
+    <li><a href="#about">sobre<span class="hover-sketch"><svg width="20" height="12" viewBox="0 0 20 12" fill="none"><path d="M2 6 Q6 2 10 6 Q14 10 18 6" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></a></li>
+    <li><a href="#work">experiência<span class="hover-sketch"><svg width="20" height="12" viewBox="0 0 20 12" fill="none"><path d="M2 6 Q6 2 10 6 Q14 10 18 6" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></a></li>
+    <li><a href="#contact">contato<span class="hover-sketch"><svg width="20" height="12" viewBox="0 0 20 12" fill="none"><path d="M2 6 Q6 2 10 6 Q14 10 18 6" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="fade-in">
+    <div class="hero-tag">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12 L8 7 L8 17 Z" fill="#c8401a"/><path d="M10 9 L21 9 M10 12 L18 12 M10 15 L21 15" stroke="#c8401a" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Engenheiro de Software Sênior
+    </div>
+    <h1>Guilherme<br><em>Mendes</em></h1>
+    <p class="hero-sub">Especialista em APIs de alta performance com Java e AWS. Histórico comprovado em grandes instituições financeiras — Santander e Itaú. Apaixonado por arquitetura limpa e sistemas que escalam.</p>
+    <div class="hero-cta">
+      <a href="#work" class="btn btn-primary">Ver Experiência
+        <span class="btn-sketch"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M6 26 L26 6 M18 6 L26 6 L26 14" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a href="#contact" class="btn">Contato
+        <span class="btn-sketch"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="10" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-dasharray="4 2"/><path d="M12 16 L14 18 L20 12" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a href="https://guilhermemendes.dev/" class="btn-link" target="_blank">website ↗</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-doodle-field">
+      <svg class="d" style="left:50%;top:50%;transform:translate(-50%,-50%);animation:jitter 0.15s steps(1) infinite" width="220" height="240" viewBox="0 0 220 240" fill="none">
+        <ellipse cx="110" cy="160" rx="65" ry="60" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+        <ellipse cx="110" cy="90" rx="45" ry="42" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+        <path d="M70 60 L58 30 L88 52" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        <path d="M150 60 L162 30 L132 52" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        <path d="M71 57 L63 38 L83 52" stroke="#1a1a1a" stroke-width="1" fill="rgba(200,64,26,0.15)" stroke-linejoin="round"/>
+        <path d="M149 57 L157 38 L137 52" stroke="#1a1a1a" stroke-width="1" fill="rgba(200,64,26,0.15)" stroke-linejoin="round"/>
+        <ellipse cx="94" cy="86" rx="8" ry="9" fill="#1a1a1a" style="animation:blink 4s ease-in-out infinite"/>
+        <ellipse cx="126" cy="86" rx="8" ry="9" fill="#1a1a1a" style="animation:blink 4s ease-in-out infinite 0.1s"/>
+        <circle cx="97" cy="83" r="2.5" fill="white"/>
+        <circle cx="129" cy="83" r="2.5" fill="white"/>
+        <path d="M107 98 L110 95 L113 98 L110 101 Z" fill="#1a1a1a"/>
+        <path d="M110 101 Q105 106 100 104 M110 101 Q115 106 120 104" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <path d="M60 97 L92 97 M60 102 L92 103 M128 97 L160 97 M128 103 L160 102" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+        <ellipse cx="78" cy="208" rx="20" ry="10" stroke="#1a1a1a" stroke-width="1.8" fill="none"/>
+        <ellipse cx="142" cy="208" rx="20" ry="10" stroke="#1a1a1a" stroke-width="1.8" fill="none"/>
+        <path d="M68 208 L68 215 M78 210 L78 217 M88 208 L88 215 M132 208 L132 215 M142 210 L142 217 M152 208 L152 215" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round"/>
+        <path d="M173 185 Q210 175 205 205 Q200 220 185 215" stroke="#1a1a1a" stroke-width="2.2" fill="none" stroke-linecap="round" style="animation:tail-wag 1.4s ease-in-out infinite; transform-origin:173px 185px"/>
+        <path d="M88 130 Q110 125 132 130 M85 145 Q110 140 135 145" stroke="#1a1a1a" stroke-width="1" fill="none" opacity="0.3"/>
+        <path d="M75 118 Q110 112 145 118" stroke="#c8401a" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="110" cy="119" r="4" fill="#c8401a"/>
+      </svg>
+      <svg class="d" style="left:10px;top:30px;animation:bounce 2.1s ease-in-out infinite" width="30" height="30" viewBox="0 0 30 30" fill="none">
+        <path d="M15 4 L17 12 L25 12 L19 17 L21 25 L15 20 L9 25 L11 17 L5 12 L13 12 Z" stroke="#1a1a1a" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <svg class="d" style="right:20px;top:10px;animation:bounce 1.8s ease-in-out infinite 0.3s" width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M10 2 L11.5 8 L18 8 L12.5 11.5 L14.5 18 L10 14 L5.5 18 L7.5 11.5 L2 8 L8.5 8 Z" stroke="#c8401a" stroke-width="1.2" fill="rgba(200,64,26,0.1)"/>
+      </svg>
+      <svg class="d" style="left:0;bottom:100px" width="90" height="50" viewBox="0 0 90 50" fill="none">
+        <path d="M10 40 Q40 10 65 25" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-dasharray="5 3"/>
+        <path d="M60 20 L65 25 L58 28" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="2" y="48" font-family="Caveat, cursive" font-size="11" fill="#c8401a">esse sou eu →</text>
+      </svg>
+      <svg class="d" style="right:30px;bottom:20px;opacity:0.4" width="60" height="60" viewBox="0 0 60 60" fill="none">
+        <circle cx="10" cy="10" r="2" fill="#1a1a1a"/><circle cx="30" cy="10" r="2" fill="#1a1a1a"/><circle cx="50" cy="10" r="2" fill="#1a1a1a"/>
+        <circle cx="10" cy="30" r="2" fill="#1a1a1a"/><circle cx="30" cy="30" r="2" fill="#1a1a1a"/><circle cx="50" cy="30" r="2" fill="#1a1a1a"/>
+        <circle cx="10" cy="50" r="2" fill="#1a1a1a"/><circle cx="30" cy="50" r="2" fill="#1a1a1a"/><circle cx="50" cy="50" r="2" fill="#1a1a1a"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item fade-in" style="transition-delay:0.4s">
+      <div class="stat-num">4+</div>
+      <div class="stat-label">Anos exp.</div>
+      <svg class="stat-sketch" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2 L11.5 8 L18 8 L12.5 11.5 L14.5 18 L10 14 L5.5 18 L7.5 11.5 L2 8 L8.5 8 Z" stroke="#c8401a" stroke-width="1.2" fill="none"/></svg>
+    </div>
+    <div class="stat-item fade-in" style="transition-delay:0.6s">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Big Banks</div>
+    </div>
+    <div class="stat-item fade-in" style="transition-delay:0.8s">
+      <div class="stat-num">AWS</div>
+      <div class="stat-label">Certified</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDER: gato andando -->
+<div class="sketch-divider">
+  <hr class="divider-line">
+  <svg class="walking-cat" width="50" height="36" viewBox="0 0 50 36" fill="none">
+    <ellipse cx="25" cy="20" rx="16" ry="10" stroke="#1a1a1a" stroke-width="1.5" fill="var(--paper)"/>
+    <ellipse cx="39" cy="14" rx="10" ry="9" stroke="#1a1a1a" stroke-width="1.5" fill="var(--paper)"/>
+    <path d="M34 7 L31 1 L38 6 M44 7 L47 1 L42 6" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-linejoin="round"/>
+    <circle cx="42" cy="13" r="2" fill="#1a1a1a" style="animation:blink 3s ease-in-out infinite"/>
+    <circle cx="47" cy="16" r="1" fill="#1a1a1a"/>
+    <path d="M42 16 L48 15 M42 17 L48 18" stroke="#1a1a1a" stroke-width="0.8" stroke-linecap="round"/>
+    <path d="M14 28 L11 35" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" style="animation:walk-leg1 0.5s ease-in-out infinite alternate"/>
+    <path d="M20 29 L22 35" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" style="animation:walk-leg2 0.5s ease-in-out infinite alternate"/>
+    <path d="M28 29 L26 35" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" style="animation:walk-leg1 0.5s ease-in-out infinite alternate 0.25s"/>
+    <path d="M34 28 L37 35" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round" style="animation:walk-leg2 0.5s ease-in-out infinite alternate 0.25s"/>
+    <path d="M9 20 Q0 15 2 8" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" style="animation:tail-wag 0.6s ease-in-out infinite; transform-origin:9px 20px"/>
+  </svg>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="fade-in">
+    <div class="section-label">// quem sou eu</div>
+    <h2>Backend first,<br>qualidade sempre.</h2>
+    <div class="about-body">
+      <p>Engenheiro de Software Sênior com mais de 4 anos de experiência desenvolvendo APIs de alta performance e escalabilidade em Java. Passei pelos times de cartões do Itaú e do Santander — sistemas críticos, zero margem para erro.</p>
+      <p>Atualmente na F1RST Digital, integrando ecossistemas financeiros com Spring Boot, Kafka e AWS. Arquitetura Hexagonal é religião, testes automatizados são rotina, e café preto é combustível.</p>
+    </div>
+    <svg style="margin-top:1.5rem;opacity:0.7" width="150" height="30" viewBox="0 0 150 30" fill="none">
+      <path d="M2 15 Q40 5 80 18 Q100 24 130 12 L140 12" stroke="#c8401a" stroke-width="1.2" fill="none" stroke-dasharray="4 2" stroke-linecap="round"/>
+      <path d="M136 8 L140 12 L136 16" stroke="#c8401a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="2" y="28" font-family="Caveat, cursive" font-size="11" fill="#c8401a">o que importa ↑</text>
+    </svg>
+  </div>
+
+  <div class="about-right fade-in" style="transition-delay:0.2s">
+    <svg class="about-sketch-float" width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <path d="M40 10 C25 10 15 22 15 35 C15 52 30 62 40 70 C50 62 65 52 65 35 C65 22 55 10 40 10 Z" stroke="#1a1a1a" stroke-width="1.8" fill="none"/>
+      <path d="M30 32 Q40 24 50 32" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="30" cy="35" r="4" fill="#1a1a1a" style="animation:blink 3.5s ease-in-out infinite"/>
+      <circle cx="50" cy="35" r="4" fill="#1a1a1a" style="animation:blink 3.5s ease-in-out infinite 0.1s"/>
+      <circle cx="32" cy="33" r="1.5" fill="white"/>
+      <circle cx="52" cy="33" r="1.5" fill="white"/>
+      <path d="M38 44 Q40 47 42 44" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M55 15 Q57 12 59 15 Q61 12 63 15 Q63 18 59 22 Q55 18 55 15 Z" stroke="#c8401a" stroke-width="1.2" fill="none"/>
+    </svg>
+    <div class="section-label" style="margin-top:2rem">// stack & ferramentas</div>
+    <div class="skills-grid">
+      <div class="skill-chip"><span class="chip-dot"></span>Java / Kotlin</div>
+      <div class="skill-chip"><span class="chip-dot"></span>Spring Boot</div>
+      <div class="skill-chip"><span class="chip-dot"></span>Apache Kafka</div>
+      <div class="skill-chip"><span class="chip-dot"></span>AWS (EKS, S3...)</div>
+      <div class="skill-chip"><span class="chip-dot"></span>Docker / CI/CD</div>
+      <div class="skill-chip"><span class="chip-dot"></span>Elasticsearch</div>
+      <div class="skill-chip"><span class="chip-dot"></span>JUnit / Mockito</div>
+      <div class="skill-chip"><span class="chip-dot"></span>Clean/Hex Arch</div>
+    </div>
+    <svg style="position:absolute;right:-10px;bottom:-20px;opacity:0.3" width="60" height="80" viewBox="0 0 60 80" fill="none">
+      <path d="M40 5 L10 5 L10 75 L40 75" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- DIVIDER 2 -->
+<div class="sketch-divider" style="height:100px">
+  <hr class="divider-line">
+  <svg style="position:absolute;left:20%;top:50%;transform:translateY(-50%);animation:float 3s ease-in-out infinite" width="40" height="40" viewBox="0 0 40 40" fill="none">
+    <circle cx="20" cy="20" r="16" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>
+    <circle cx="14" cy="20" r="3" fill="#1a1a1a" style="animation:blink 2.5s ease-in-out infinite"/>
+    <circle cx="26" cy="20" r="3" fill="#1a1a1a" style="animation:blink 2.5s ease-in-out infinite 0.1s"/>
+    <path d="M16 26 Q20 29 24 26" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </svg>
+  <svg style="position:absolute;right:20%;top:30%;animation:bounce 2s ease-in-out infinite 0.5s" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M12 3 C12 3 5 8 5 14 C5 18 8 21 12 21 C16 21 19 18 19 14 C19 8 12 3 12 3 Z" stroke="#c8401a" stroke-width="1.2" fill="rgba(200,64,26,0.1)"/>
+  </svg>
+</div>
+
+<!-- WORK -->
+<section id="work">
+  <div class="work-header">
+    <div>
+      <div class="section-label">// experiência</div>
+      <h2>Onde já<br>estive.</h2>
+    </div>
+    <a href="https://github.com/Mendeszx" class="btn-link" style="margin-bottom:0.8rem" target="_blank">GitHub ↗</a>
+  </div>
+  <div class="project-grid">
+
+    <div class="project-card fade-in">
+      <span class="card-hover-sketch"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M10 26 L26 10 M20 10 L26 10 L26 16" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="26" r="4" stroke="#c8401a" stroke-width="1.5" fill="none"/></svg></span>
+      <div class="card-num">01</div>
+      <div class="card-title">F1RST Digital</div>
+      <p class="card-desc">Sênior no time de cartões do Santander. APIs RESTful com Java/Spring Boot, Kafka, Elasticsearch, Grafana e toda a infra na AWS (EKS). Arquitetura Hexagonal, testes de mutação e SonarQube.</p>
+      <div class="card-tags"><span class="tag">Java</span><span class="tag">Kafka</span><span class="tag">AWS EKS</span><span class="tag">Grafana</span></div>
+    </div>
+
+    <div class="project-card fade-in" style="transition-delay:0.15s">
+      <span class="card-hover-sketch"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M10 26 L26 10 M20 10 L26 10 L26 16" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="26" r="4" stroke="#c8401a" stroke-width="1.5" fill="none"/></svg></span>
+      <div class="card-num">02</div>
+      <div class="card-title">Stefanini / Santander</div>
+      <p class="card-desc">Pleno no ecossistema de pagamentos do Santander. Interoperabilidade com mainframes e APIs externas, integrações assíncronas via Kafka e monitoramento com Elasticsearch.</p>
+      <div class="card-tags"><span class="tag">Spring Boot</span><span class="tag">Kafka</span><span class="tag">Elasticsearch</span></div>
+    </div>
+
+    <div class="project-card fade-in" style="transition-delay:0.3s">
+      <span class="card-hover-sketch"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M10 26 L26 10 M20 10 L26 10 L26 16" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="26" r="4" stroke="#c8401a" stroke-width="1.5" fill="none"/></svg></span>
+      <div class="card-num">03</div>
+      <div class="card-title">Hypeone</div>
+      <p class="card-desc">Liderou migrações de RPAs do UiPath para Java/Spring Boot (Alelo e Bradesco), reduzindo custos de infra. Reestruturou arquiteturas e implementou CI/CD com Jenkins e Docker Swarm.</p>
+      <div class="card-tags"><span class="tag">Java</span><span class="tag">Selenium</span><span class="tag">Docker</span><span class="tag">Jenkins</span></div>
+    </div>
+
+    <div class="project-card fade-in" style="transition-delay:0.45s">
+      <span class="card-hover-sketch"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M10 26 L26 10 M20 10 L26 10 L26 16" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="26" r="4" stroke="#c8401a" stroke-width="1.5" fill="none"/></svg></span>
+      <div class="card-num">04</div>
+      <div class="card-title">Valemobi / Trademap</div>
+      <p class="card-desc">APIs REST e Crawlers em Kotlin e Java fornecendo dados de mercado financeiro para frontend mobile e web. Deploy On Premises com Docker e CI/CD automatizado.</p>
+      <div class="card-tags"><span class="tag">Kotlin</span><span class="tag">Java</span><span class="tag">Docker</span><span class="tag">REST</span></div>
+    </div>
+
+    <div class="project-card fade-in" style="transition-delay:0.6s">
+      <span class="card-hover-sketch"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M10 26 L26 10 M20 10 L26 10 L26 16" stroke="#c8401a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="26" r="4" stroke="#c8401a" stroke-width="1.5" fill="none"/></svg></span>
+      <div class="card-num">05</div>
+      <div class="card-title">Itaú Unibanco</div>
+      <p class="card-desc">Estágio no time de cartões do Itaú. APIs REST com Java, Kotlin e Spring Boot, Clean Code, testes unitários com JUnit e documentação técnica detalhada.</p>
+      <div class="card-tags"><span class="tag">Java</span><span class="tag">Kotlin</span><span class="tag">Spring Boot</span><span class="tag">JUnit</span></div>
+    </div>
+
+    <div class="project-card fade-in" style="transition-delay:0.75s;display:flex;align-items:center;justify-content:center;min-height:200px;background:transparent;border:1.5px dashed var(--line)">
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none" style="opacity:0.5">
+        <ellipse cx="80" cy="60" rx="35" ry="28" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-dasharray="5 3"/>
+        <circle cx="70" cy="52" r="5" stroke="#1a1a1a" stroke-width="1.2" fill="none"/>
+        <circle cx="90" cy="52" r="5" stroke="#1a1a1a" stroke-width="1.2" fill="none"/>
+        <path d="M72 65 Q80 70 88 65" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M80 32 Q75 20 70 15 M80 32 Q85 20 90 15" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <circle cx="70" cy="14" r="3" stroke="#c8401a" stroke-width="1.2" fill="none" style="animation:bounce 1.5s ease-in-out infinite"/>
+        <circle cx="90" cy="14" r="3" stroke="#c8401a" stroke-width="1.2" fill="none" style="animation:bounce 1.5s ease-in-out infinite 0.2s"/>
+        <path d="M55 75 L48 90 M65 80 L60 95 M95 80 L100 95 M105 75 L112 90" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+        <text x="40" y="112" font-family="Caveat, cursive" font-size="12" fill="#7a7570">próximo projeto →</text>
+      </svg>
+    </div>
+
+  </div>
+</section>
+
+<!-- DIVIDER 3 -->
+<div class="sketch-divider" style="height:100px">
+  <hr class="divider-line">
+  <svg style="position:absolute;right:15%;top:50%;transform:translateY(-50%);animation:float 2.5s ease-in-out infinite" width="30" height="30" viewBox="0 0 30 30" fill="none">
+    <path d="M15 4 L17 12 L25 12 L19 17 L21 25 L15 20 L9 25 L11 17 L5 12 L13 12 Z" stroke="#c8401a" stroke-width="1.2" fill="rgba(200,64,26,0.15)"/>
+  </svg>
+</div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner fade-in">
+    <svg class="contact-sketch-left" width="60" height="100" viewBox="0 0 60 100" fill="none">
+      <path d="M30 10 C15 10 10 22 10 34 L10 70 L18 62 L26 70 L30 65 L34 70 L42 62 L50 70 L50 34 C50 22 45 10 30 10 Z" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+      <circle cx="22" cy="32" r="4" fill="#1a1a1a" style="animation:blink 4s ease-in-out infinite"/>
+      <circle cx="38" cy="32" r="4" fill="#1a1a1a" style="animation:blink 4s ease-in-out infinite 0.15s"/>
+      <circle cx="24" cy="30" r="1.5" fill="white"/>
+      <circle cx="40" cy="30" r="1.5" fill="white"/>
+      <path d="M24 44 Q30 49 36 44" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <text x="-2" y="92" font-family="Caveat, cursive" font-size="11" fill="#7a7570">manda um oi!</text>
+    </svg>
+    <svg class="contact-sketch-right" width="70" height="80" viewBox="0 0 70 80" fill="none">
+      <path d="M35 10 L37 18 L45 18 L39 23 L41 31 L35 26 L29 31 L31 23 L25 18 L33 18 Z" stroke="#c8401a" stroke-width="1.2" fill="rgba(200,64,26,0.15)"/>
+      <path d="M10 50 Q30 38 55 48" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-dasharray="4 2" stroke-linecap="round"/>
+      <path d="M51 44 L55 48 L50 51" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <div class="section-label">// bora conversar</div>
+    <h2 style="font-size:clamp(1.5rem,3vw,2.5rem);margin-bottom:1rem">Aberto a projetos<br>desafiadores.</h2>
+    <p style="font-size:0.82rem;color:var(--muted);line-height:1.8;margin-bottom:2rem">Seja uma vaga sênior, consultoria em arquitetura ou só um papo sobre sistemas distribuídos — pode mandar mensagem.</p>
+    <a href="mailto:guilherme_gmc@outlook.com" class="contact-email">guilherme_gmc@outlook.com</a>
+
+    <div class="contact-social">
+      <a href="https://www.linkedin.com/in/guilhermemendes-cunha" class="social-link" target="_blank">
+        <span class="hover-arrow"><svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M2 12 L10 4 L18 12" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        LinkedIn
+      </a>
+      <a href="https://github.com/Mendeszx" class="social-link" target="_blank">
+        <span class="hover-arrow"><svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M2 12 L10 4 L18 12" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        GitHub
+      </a>
+      <a href="https://guilhermemendes.dev/" class="social-link" target="_blank">
+        <span class="hover-arrow"><svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M2 12 L10 4 L18 12" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        Website
+      </a>
+      <a href="tel:11940690606" class="social-link">
+        <span class="hover-arrow"><svg width="20" height="14" viewBox="0 0 20 14" fill="none"><path d="M2 12 L10 4 L18 12" stroke="#c8401a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        (11) 94069-0606
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:0.4rem">Guilherme Mendes</div>
+    <div>Engenheiro de Software Sênior</div>
+    <div style="margin-top:0.4rem">© 2025 — Feito com cuidado</div>
+  </div>
+
+  <div class="footer-center">
+    <svg width="200" height="180" viewBox="0 0 200 180" fill="none">
+      <rect x="30" y="100" width="140" height="85" rx="6" stroke="#1a1a1a" stroke-width="1.8" fill="var(--paper)"/>
+      <rect x="40" y="108" width="120" height="60" rx="2" stroke="#1a1a1a" stroke-width="1.2" fill="var(--paper-dark)"/>
+      <path d="M50 120 L90 120" stroke="#c8401a" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M54 128 L80 128 M54 136 L100 136 M54 144 L85 144 M54 152 L70 152" stroke="#1a1a1a" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+      <rect x="72" y="152" width="6" height="9" fill="#c8401a" opacity="0.8" style="animation:blink 1s steps(1) infinite"/>
+      <rect x="20" y="182" width="160" height="8" rx="4" stroke="#1a1a1a" stroke-width="1.5" fill="var(--paper)"/>
+      <ellipse cx="100" cy="82" rx="32" ry="26" stroke="#1a1a1a" stroke-width="1.8" fill="var(--paper)"/>
+      <ellipse cx="100" cy="52" rx="26" ry="24" stroke="#1a1a1a" stroke-width="1.8" fill="var(--paper)"/>
+      <path d="M79 35 L72 18 L88 30 M121 35 L128 18 L112 30" stroke="#1a1a1a" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+      <path d="M80 33 L75 22 L86 30" stroke="#1a1a1a" stroke-width="0.8" fill="rgba(200,64,26,0.2)" stroke-linejoin="round"/>
+      <path d="M120 33 L125 22 L114 30" stroke="#1a1a1a" stroke-width="0.8" fill="rgba(200,64,26,0.2)" stroke-linejoin="round"/>
+      <ellipse cx="90" cy="50" rx="5" ry="6" fill="#1a1a1a" style="animation:blink 5s ease-in-out infinite"/>
+      <ellipse cx="110" cy="50" rx="5" ry="6" fill="#1a1a1a" style="animation:blink 5s ease-in-out infinite 0.1s"/>
+      <circle cx="92" cy="47" r="2" fill="white"/><circle cx="112" cy="47" r="2" fill="white"/>
+      <path d="M95 65 Q100 69 105 65" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M76 58 L90 58 M76 62 L90 61 M110 58 L124 58 M110 61 L124 62" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+      <ellipse cx="74" cy="100" rx="18" ry="9" stroke="#1a1a1a" stroke-width="1.5" fill="var(--paper)"/>
+      <ellipse cx="126" cy="100" rx="18" ry="9" stroke="#1a1a1a" stroke-width="1.5" fill="var(--paper)"/>
+      <path d="M132 90 Q155 80 150 100 Q146 112 136 108" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round" style="animation:tail-wag 1.8s ease-in-out infinite; transform-origin:132px 90px"/>
+      <path d="M100 12 C100 12 95 7 90 11 C85 15 88 20 100 28 C112 20 115 15 110 11 C105 7 100 12 100 12 Z" stroke="#c8401a" stroke-width="1.5" fill="rgba(200,64,26,0.15)" style="animation:bounce 2s ease-in-out infinite"/>
+      <text x="10" y="175" font-family="Caveat, cursive" font-size="10" fill="#7a7570">deployando código desde 2021</text>
+    </svg>
+  </div>
+
+  <div class="footer-right">
+    <div>Desenhado &amp; codado</div>
+    <div>com café preto ☕</div>
+    <div style="margin-top:0.4rem">
+      <svg style="display:inline;vertical-align:middle" width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1 L8.2 5 L12 5 L9 7.5 L10.2 11.5 L7 9 L3.8 11.5 L5 7.5 L2 5 L5.8 5 Z" stroke="#c8401a" stroke-width="1" fill="rgba(200,64,26,0.3)"/>
+      </svg>
+      Diadema, SP
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Loader some em 1.2s — sem depender de window.load
+  setTimeout(function() {
+    document.getElementById('loader').classList.add('gone');
+  }, 1200);
+
+  // Cursor
+  var cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', function(e) {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+
+  // Fade-in ao scroll
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.fade-in').forEach(function(el) { io.observe(el); });
+
+  // Esconde scroll indicator
+  var si = document.getElementById('scrollIndicator');
+  window.addEventListener('scroll', function() {
+    si.style.opacity = window.scrollY > 200 ? '0' : '1';
+  });
+</script>
+</body>
+</html>
